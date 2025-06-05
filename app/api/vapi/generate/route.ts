@@ -1,19 +1,16 @@
-import {google} from "@ai-sdk/google";
-import {getRandomInterviewCover} from "@/lib/utils";
-import {db} from "@/firebase/admin";
-import {generateText} from "ai";
+import { generateText } from "ai";
+import { google } from "@ai-sdk/google";
 
-export async function GET() {
-    return Response.json({ success: true, data: 'THANK YOU!'}, { status: 200 });
-}
+import { db } from "@/firebase/admin";
+import { getRandomInterviewCover } from "@/lib/utils";
 
 export async function POST(request: Request) {
     const { type, role, level, techstack, amount, userid } = await request.json();
 
-    try {
-        const { text: questions } = await generateText({
-            model: google('gemini-2.0-flash-001'),
-            prompt: `Prepare questions for a job interview.
+  try {
+    const { text: questions } = await generateText({
+      model: google("gemini-2.0-flash-001"),
+      prompt: `Prepare questions for a job interview.
         The job role is ${role}.
         The job experience level is ${level}.
         The tech stack used in the job is: ${techstack}.
@@ -28,15 +25,17 @@ export async function POST(request: Request) {
     `,
         });
 
-        const interview = {
-            role, type, level,
-            techstack: techstack.split(','),
-            questions: JSON.parse(questions),
-            userId: userid,
-            finalized: true,
-            coverImage: getRandomInterviewCover(),
-            createdAt: new Date().toISOString()
-        }
+    const interview = {
+      role: role,
+      type: type,
+      level: level,
+      techstack: techstack.split(","),
+      questions: JSON.parse(questions),
+      userId: userid,
+      finalized: true,
+      coverImage: getRandomInterviewCover(),
+      createdAt: new Date().toISOString(),
+    };
 
         await db.collection("interviews").add(interview);
 
@@ -48,3 +47,6 @@ export async function POST(request: Request) {
     }
 }
 
+export async function GET() {
+  return Response.json({ success: true, data: "Thank you!" }, { status: 200 });
+}
